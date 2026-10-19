@@ -1,0 +1,11 @@
+snapshots:
+  - name: snap_planit_applications
+    description: >
+      Status history. Each change to state, decision date or status text opens a new row,
+      so decision times and status paths can be measured later.
+    relation: ref('stg_planit__applications')
+    config:
+      schema: snapshots
+      unique_key: application_id
+      strategy: check
+      check_cols: [app_state, decided_on, status_text]

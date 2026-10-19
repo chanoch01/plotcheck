@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: planit
+    description: Raw PlanIt records merged on `name` by dlt (see src/plotcheck/warehouse.py).
+    schema: raw
+    tables:
+      - name: planit_applications
+        description: One row per planning application, latest version.
+        config:
+          loaded_at_field: "cast(last_scraped as timestamp)"
+          freshness:
+            warn_after: { count: 3, period: day }
+            error_after: { count: 7, period: day }
+        columns:
+          - name: name
+            description: PlanIt's UK-wide unique application name.
+            data_tests: [unique, not_null]

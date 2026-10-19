@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev,pipeline]"
+      - run: ruff check . && ruff format --check .
+      - run: pytest
+      - run: dagster definitions validate -m plotcheck.defs
+
+  dbt:
+    # Loads the synthetic fixture with the real loader, then builds every model and test.
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: plotcheck
+          POSTGRES_PASSWORD: plotcheck
+          POSTGRES_DB: plotcheck
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U plotcheck -d plotcheck"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DESTINATION__POSTGRES__CREDENTIALS: postgresql://plotcheck:plotcheck@localhost:5432/plotcheck
+      DBT_PROFILES_DIR: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[pipeline,dbt]"
+      - run: plotcheck load-file tests/fixtures/sample_applications.jsonl.gz
+      - run: dbt build
+        working-directory: dbt

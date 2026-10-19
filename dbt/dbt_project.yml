@@ -1,0 +1,24 @@
+name: plotcheck
+version: "0.1.0"
+config-version: 2
+profile: plotcheck
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+
+vars:
+  # Comparables must lie within this distance (metres, British National Grid).
+  comparable_radius_m: 500
+
+models:
+  plotcheck:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts

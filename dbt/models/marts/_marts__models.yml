@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: fct_applications
+    description: Applications with outcome flag, decision time and a British National Grid point.
+    columns:
+      - name: application_id
+        data_tests: [unique, not_null]
+      - name: decision_days
+        description: Days from submission to decision; null until decided.
+
+  - name: fct_application_features
+    description: >
+      Neighbourhood features per application, using only decisions made before it was
+      submitted (radius set by the `comparable_radius_m` var).
+    columns:
+      - name: application_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_applications')
+                field: application_id
+      - name: n_prior_decided_nearby
+        data_tests: [not_null]

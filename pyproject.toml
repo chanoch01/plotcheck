@@ -1,0 +1,48 @@
+[project]
+name = "plotcheck"
+version = "0.1.0"
+description = "Know your planning odds before you apply: a planning-risk pipeline for Scottish councils."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "httpx>=0.27",
+    "fsspec>=2024.6",
+]
+
+[project.optional-dependencies]
+# Loading to Postgres and orchestration (Week 1+)
+pipeline = [
+    "dlt[postgres]>=1.4",
+    "dagster>=1.9",
+    "dagster-webserver>=1.9",
+    "adlfs>=2024.7",          # abfs:// landing zone on Azure Blob Storage
+]
+# Transformations (Week 2+)
+dbt = ["dbt-postgres>=1.9"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+plotcheck = "plotcheck.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: needs a running PostGIS database"]
+addopts = "-m 'not integration'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.dagster]
+module_name = "plotcheck.defs"

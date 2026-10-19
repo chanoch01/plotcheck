@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_planit__applications
+    description: PlanIt applications, renamed and typed, with a WGS84 point.
+    columns:
+      - name: application_id
+        data_tests: [unique, not_null]
+      - name: council
+        data_tests: [not_null]
+      - name: app_state
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  [Undecided, Permitted, Conditions, Rejected, Withdrawn, Referred, Unresolved, Other]
+      - name: submitted_on
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: fetched_at
+        description: When PlotCheck fetched the record (provenance).
+        data_tests: [not_null]
